@@ -51,6 +51,13 @@ public class JohnMovement : MonoBehaviour
             Shoot();
             LastShoot = Time.time;
         }
+
+        // Caer fuera del mapa
+        if (transform.position.y < -10f)
+        {
+            GameManager.Instance.PlayerDied();
+            Destroy(gameObject);
+        }
     }
 
     private void FixedUpdate()
@@ -76,6 +83,10 @@ public class JohnMovement : MonoBehaviour
     public void Hit()
     {
         Health -= 1;
-        if (Health == 0) Destroy(gameObject);
+        if (Health == 0)
+        {
+            GameManager.Instance.PlayerDied();
+            Destroy(gameObject);
+        }
     }
 }
