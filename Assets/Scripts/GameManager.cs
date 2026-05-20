@@ -23,7 +23,7 @@ public class GameManager : MonoBehaviour
         victoryPanel.SetActive(false);
         defeatPanel.SetActive(false);
 
-        enemiesAlive = FindObjectsOfType<GruntScript>().Length;
+        enemiesAlive = FindObjectsByType<GruntScript>(FindObjectsSortMode.None).Length;
     }
 
     public void EnemyKilled()
@@ -59,5 +59,14 @@ public class GameManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void NextLevel()
+    {
+        Time.timeScale = 1f;
+
+        int currentScene = SceneManager.GetActiveScene().buildIndex;
+
+        SceneManager.LoadScene(currentScene + 1);
     }
 }
