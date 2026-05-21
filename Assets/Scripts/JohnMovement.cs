@@ -6,6 +6,7 @@ public class JohnMovement : MonoBehaviour
 {
     public float Speed;
     public float JumpForce;
+    public float ShootCooldown = 0.25f;
     public GameObject BulletPrefab;
 
     private Rigidbody2D Rigidbody2D;
@@ -46,7 +47,7 @@ public class JohnMovement : MonoBehaviour
         }
 
         // Disparar
-        if (Input.GetKey(KeyCode.Space) && Time.time > LastShoot + 0.25f)
+        if (Input.GetKey(KeyCode.Space) && Time.time > LastShoot + ShootCooldown)
         {
             Shoot();
             LastShoot = Time.time;
@@ -88,5 +89,19 @@ public class JohnMovement : MonoBehaviour
             GameManager.Instance.PlayerDied();
             Destroy(gameObject);
         }
+    }
+
+    public IEnumerator PowerMode(float extraJump, float fireRate, float duration)
+    {
+        float originalJump = JumpForce;
+        float originalCooldown = ShootCooldown;
+
+        JumpForce += extraJump;
+        ShootCooldown = fireRate;
+
+        yield return new WaitForSeconds(duration);
+
+        JumpForce = originalJump;
+        ShootCooldown = originalCooldown;
     }
 }
