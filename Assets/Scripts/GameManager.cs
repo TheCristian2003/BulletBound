@@ -69,4 +69,10 @@ public class GameManager : MonoBehaviour
 
         SceneManager.LoadScene(currentScene + 1);
     }
+
+    public void ReturnToMainMenu()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("MenuPrincipal");
+    }
 }
