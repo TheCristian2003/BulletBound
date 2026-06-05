@@ -9,7 +9,12 @@ public class GameManager : MonoBehaviour
     public GameObject victoryPanel;
     public GameObject defeatPanel;
 
-    private int enemiesAlive;
+    [Header("Totems")]
+    public int totalTotems = 3;
+    private int collectedTotems = 0;
+
+    [Header("Portal")]
+    public GameObject portal;
 
     private void Awake()
     {
@@ -23,36 +28,33 @@ public class GameManager : MonoBehaviour
         victoryPanel.SetActive(false);
         defeatPanel.SetActive(false);
 
-        enemiesAlive = FindObjectsByType<GruntScript>(FindObjectsSortMode.None).Length;
+        if (portal != null)
+            portal.SetActive(false);
     }
 
-    public void EnemyKilled()
+    public void CollectTotem()
     {
-        enemiesAlive--;
+        collectedTotems++;
 
-        Debug.Log("Enemigos restantes: " + enemiesAlive);
+        Debug.Log("Tótems recogidos: " + collectedTotems + "/" + totalTotems);
 
-        if (enemiesAlive <= 0)
+        if (collectedTotems >= totalTotems)
         {
-            Victory();
+            if (portal != null)
+                portal.SetActive(true);
         }
     }
 
     public void PlayerDied()
     {
-        Defeat();
+        Time.timeScale = 0f;
+        defeatPanel.SetActive(true);
     }
 
-    private void Victory()
+    public void Victory()
     {
         Time.timeScale = 0f;
         victoryPanel.SetActive(true);
-    }
-
-    private void Defeat()
-    {
-        Time.timeScale = 0f;
-        defeatPanel.SetActive(true);
     }
 
     public void RestartLevel()
@@ -65,9 +67,12 @@ public class GameManager : MonoBehaviour
     {
         Time.timeScale = 1f;
 
-        int currentScene = SceneManager.GetActiveScene().buildIndex;
+        int nextScene = SceneManager.GetActiveScene().buildIndex + 1;
 
-        SceneManager.LoadScene(currentScene + 1);
+        if (nextScene < SceneManager.sceneCountInBuildSettings)
+            SceneManager.LoadScene(nextScene);
+        else
+            SceneManager.LoadScene("MenuPrincipal");
     }
 
     public void ReturnToMainMenu()

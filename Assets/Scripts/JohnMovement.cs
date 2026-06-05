@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class JohnMovement : MonoBehaviour
@@ -9,22 +8,28 @@ public class JohnMovement : MonoBehaviour
     public float ShootCooldown = 0.25f;
     public GameObject BulletPrefab;
 
+    public int maxHealth = 5;
+    public int currentHealth;
+
     private Rigidbody2D Rigidbody2D;
     private Animator Animator;
     private float Horizontal;
     private bool Grounded;
     private float LastShoot;
-    private int Health = 5;
 
     private void Start()
     {
         Rigidbody2D = GetComponent<Rigidbody2D>();
         Animator = GetComponent<Animator>();
+
+        currentHealth = maxHealth;
+
+        if (HeartsUI.Instance != null)
+            HeartsUI.Instance.UpdateHearts(currentHealth);
     }
 
     private void Update()
     {
-        // Movimiento
         Horizontal = Input.GetAxisRaw("Horizontal");
 
         if (Horizontal < 0.0f) transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
@@ -32,32 +37,22 @@ public class JohnMovement : MonoBehaviour
 
         Animator.SetBool("running", Horizontal != 0.0f);
 
-        // Detectar Suelo
-        // Debug.DrawRay(transform.position, Vector3.down * 0.1f, Color.red);
-        if (Physics2D.Raycast(transform.position, Vector3.down, 0.1f))
-        {
-            Grounded = true;
-        }
-        else Grounded = false;
+        Grounded = Physics2D.Raycast(transform.position, Vector3.down, 0.1f);
 
-        // Salto
         if (Input.GetKeyDown(KeyCode.W) && Grounded)
         {
             Jump();
         }
 
-        // Disparar
         if (Input.GetKey(KeyCode.Space) && Time.time > LastShoot + ShootCooldown)
         {
             Shoot();
             LastShoot = Time.time;
         }
 
-        // Caer fuera del mapa
         if (transform.position.y < -10f)
         {
-            GameManager.Instance.PlayerDied();
-            Destroy(gameObject);
+            Die();
         }
     }
 
@@ -73,22 +68,30 @@ public class JohnMovement : MonoBehaviour
 
     private void Shoot()
     {
-        Vector3 direction;
-        if (transform.localScale.x == 1.0f) direction = Vector3.right;
-        else direction = Vector3.left;
+        Vector3 direction = transform.localScale.x == 1.0f ? Vector3.right : Vector3.left;
 
-        GameObject bullet = Instantiate(BulletPrefab, transform.position + direction * 0.1f, Quaternion.identity);
+        GameObject bullet = Instantiate(BulletPrefab, transform.position + direction * 0.3f, Quaternion.identity);
         bullet.GetComponent<BulletScript>().SetDirection(direction);
+        bullet.GetComponent<BulletScript>().SetOwner("Player");
     }
 
     public void Hit()
     {
-        Health -= 1;
-        if (Health == 0)
+        currentHealth--;
+
+        if (HeartsUI.Instance != null)
+            HeartsUI.Instance.UpdateHearts(currentHealth);
+
+        if (currentHealth <= 0)
         {
-            GameManager.Instance.PlayerDied();
-            Destroy(gameObject);
+            Die();
         }
+    }
+
+    private void Die()
+    {
+        GameManager.Instance.PlayerDied();
+        Destroy(gameObject);
     }
 
     public IEnumerator PowerMode(float extraJump, float fireRate, float duration)

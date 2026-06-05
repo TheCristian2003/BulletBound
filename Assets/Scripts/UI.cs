@@ -10,7 +10,7 @@ public class GameUI : MonoBehaviour
     public GameObject gameOverPanel;
     
     private int score = 0;
-    private int lives = 5;
+    public int lives = 5;
     
     void Start()
     {
